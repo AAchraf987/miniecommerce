@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mini E-Commerce</title>
+    <style>
+        body {
+            background-image: url('bttt.jpg'); /* Vérifie que l'image existe */
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+            background-repeat: no-repeat;
+            font-family: Arial, sans-serif;
+            text-align: center;
+            margin: 0;
+            padding: 0;
+        }
+
+        h1, h2 {
+            background: rgba(101, 99, 99, 0.5);
+            display: inline-block;
+            padding: 10px;
+            border-radius: 10px;
+        }
+
+        .product, .cart-item {
+            background: rgba(92, 84, 84, 0.8);
+            padding: 10px;
+            margin: 10px;
+            display: inline-block;
+            border-radius: 10px;
+            color: black;
+        }
+
+        .product img, .cart-item img {
+            max-width: 100px;
+            display: block;
+            margin: 0 auto;
+        }
+
+        button {
+            background-color: #000000;
+            color: rgb(223, 223, 223);
+            padding: 10px 15px;
+            border: none;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+
+        button:hover {
+            background-color: #cc5500;
+        }
+    </style>
+</head>
+<body>
+    <h1>Produits</h1>
+    <div id="products"></div>
+    
+    <h2>Panier</h2>
+    <div id="cart"></div>
+    <h3 id="total"></h3>
+    <button onclick="clearCart()">Vider le panier</button>
+
+    <script>
+        const PRODUCTS = [
+            { id: 1, name: 'Etoile Filante', price: 1400.0, image: 'OIP (1).jpg' },
+            { id: 2, name: 'Produit B', price: 1100.0, image: 'OIP.jpg' },
+            { id: 3, name: 'Produit C', price: 900.0, image: 'telecharger.jpg' },
+            { id: 4, name: 'Produit D', price: 750.0, image: 'free.jpg' },
+            { id: 5, name: 'Produit E', price: 1250.0, image: 'bg.jpg' }
+        ];
+
+        function displayProducts() {
+            let productsDiv = document.getElementById('products');
+            productsDiv.innerHTML = '';
+            PRODUCTS.forEach(product => {
+                let div = document.createElement('div');
+                div.className = 'product';
+                div.innerHTML = `
+                    <img src="${product.image}" alt="${product.name}">
+                    <p>${product.name} - ${product.price} DH</p>
+                    <button onclick="addToCart(${product.id})">Ajouter</button>
+                `;
+                productsDiv.appendChild(div);
+            });
+        }
+
+        function addToCart(productId) {
+            let cart = JSON.parse(localStorage.getItem('cart')) || {};
+
+            if (cart[productId]) {
+                cart[productId]++;  // Augmente la quantité
+            } else {
+                cart[productId] = 1; // Ajoute le produit avec quantité 1
+            }
+
+            localStorage.setItem('cart', JSON.stringify(cart));
+            displayCart();
+        }
+
+        function removeFromCart(productId) {
+            let cart = JSON.parse(localStorage.getItem('cart')) || {};
+
+            if (cart[productId]) {
+                cart[productId]--;
+                if (cart[productId] <= 0) {
+                    delete cart[productId];
+                }
+            }
+
+            localStorage.setItem('cart', JSON.stringify(cart));
+            displayCart();
+        }
+
+        function displayCart() {
+            let cartDiv = document.getElementById('cart');
+            let totalDiv = document.getElementById('total');
+            cartDiv.innerHTML = '';
+            let cart = JSON.parse(localStorage.getItem('cart')) || {};
+            let total = 0;
+
+            if (Object.keys(cart).length === 0) {
+                cartDiv.innerHTML = "<p>Votre panier est vide.</p>";
+                totalDiv.innerHTML = "";
+                return;
+            }
+
+            Object.keys(cart).forEach(productId => {
+                let product = PRODUCTS.find(p => p.id == productId);
+                let quantity = cart[productId];
+
+                if (product) {
+                    let div = document.createElement('div');
+                    div.className = 'cart-item';
+                    div.innerHTML = `
+                        <img src="${product.image}" alt="${product.name}">
+                        <p>${product.name} - ${product.price} DH x ${quantity}</p>
+                        <button onclick="removeFromCart(${productId})">Supprimer</button>
+                    `;
+                    cartDiv.appendChild(div);
+
+                    total += product.price * quantity;
+                }
+            });
+
+            totalDiv.innerHTML = `<strong>Total: ${total} DH</strong>`;
+        }
+
+        function clearCart() {
+            localStorage.removeItem('cart');
+            displayCart();
+        }
+
+        displayProducts();
+        displayCart();
+    </script>
+</body>
+</html>
